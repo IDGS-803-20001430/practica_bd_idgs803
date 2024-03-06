@@ -1,0 +1,70 @@
+{%extends 'layout.html'%}
+{%block content%}
+
+<h3>Pizzeria</h3>
+{% from "_macros.html" import render_field%}
+<div class="container">
+    <form name="registro" action="/pizzeria" id="registro" method="post">
+        <div class="row control-group">
+            <div class="form-group col-xs-12 float-label-form-group controls">
+                {{render_field(form.nombre,class="form-control")}}
+            </div>
+        </div>
+        <div class="row control-group">
+            <div class="form-group col-xs-12 float-label-form-group controls">
+                {{render_field(form.direccion,class="form-control")}}
+            </div>
+        </div>
+        <div class="row control-group">
+            <div class="form-group col-xs-12 float-label-form-group controls">
+                {{render_field(form.telefono,class="form-control")}}
+            </div>
+        </div>
+        <div class="row control-group">
+            <div class="form-group col-xs-12 float-label-form-group controls">
+                {{ render_field(form.tamaPizza, class_="", id="tamaPizza") }}
+            </div>
+        </div>        
+        <div class="row control-group">
+            <div class="form-group col-xs-12 float-label-form-group controls">
+                {{ render_field(form.ingredientesPizza, class_="", id="ingredientesPizza") }}
+            </div>
+        </div>
+        
+        <div class="row control-group">
+            <div class="form-group col-xs-12 float-label-form-group controls">
+                {{render_field(form.numPizzas,class="form-control")}}
+            </div>
+        </div>
+        <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+        <input type="submit" class="btn btn-success" id="agregar" name="agregar" value="Agregar"/>
+    </form>
+</div>
+
+<div class="container">
+    <div class="row">
+        <h3>Descripción Pedidos</h3>        
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Tamaño</th>
+                    <th>Ingredientes</th>
+                    <th>Num. Pizzas</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for pedi in pedidos%}
+                <tr>
+                    <td>{{pedi.tamaPizza}}</td>
+                    <td>{{pedi.ingredientesPizza}}</td>
+                    <td>{{pedi.numPizzas}}</td>
+                    <td>{{pedi.subtotal}}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{%endblock%}

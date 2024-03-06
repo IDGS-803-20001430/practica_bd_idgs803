@@ -8,6 +8,7 @@ import forms
 
 from models import db
 from models import Empleados
+from models import PedidosPizza
 
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
@@ -85,6 +86,30 @@ def ABC_Completo():
     
     empleado=Empleados.query.all()
     return render_template("ABC_Completo.html", empleados=empleado)
+
+@app.route("/pizzeria",methods=["GET","POST"])
+def pizzeria():
+    pizzeria_form=forms.PizzeriaForm(request.form)
+    pedidosPiza = PedidosPizza.query.all()
+    if request.method == 'POST' and pizzeria_form.validate():
+        costoPizza = int(pizzeria_form.tamaPizza.data)
+        ingrePizza = int(pizzeria_form.ingredientesPizza.data)
+        totalPizza = int(pizzeria_form.numPizzas.data)
+        subtotalPizza = str( (costoPizza+ingrePizza)*totalPizza )
+        totalPizza = "0"
+        pedidosPiza = PedidosPizza(
+                    nombre=pizzeria_form.nombre.data,
+                    direccion =pizzeria_form.direccion.data,
+                    telefono = pizzeria_form.telefono.data,
+                    tamaPizza = pizzeria_form.tamaPizza.data,
+                    ingredientesPizza = pizzeria_form.ingredientesPizza.data,
+                    numPizza = pizzeria_form.numPizzas.data,
+                    subtotal = subtotalPizza,
+                    total = totalPizza)
+        db.session.add(pedidosPiza)
+        db.session.commit()
+
+    return render_template("pizzeria.html",pedidos=pedidosPiza,form=pizzeria_form)
 
 # @app.route("/alumnos",methods=["GET","POST"])
 # def alum():
