@@ -1,6 +1,7 @@
 from wtforms import Form
-from wtforms import StringField,SelectField,RadioField,EmailField,IntegerField
+from wtforms import StringField,SelectField,RadioField,EmailField,IntegerField,DateField
 from wtforms import validators
+from wtforms.validators import DataRequired
 
 
 class UsersForm(Form):
@@ -55,8 +56,9 @@ class PizzeriaForm(Form):
     telefono= StringField('telefono',[
         validators.DataRequired(message='el campo es requerido')
     ])
-    numPizzas= IntegerField('Número Pizzas',[
-        validators.DataRequired(message='el campo es requerido')
+    numPizzas = IntegerField('Número Pizzas', [
+        validators.DataRequired(message='El campo es requerido'),
+        validators.NumberRange(min=1, message='El número de pizzas no puede ser negativo')
     ])
     
     tamaPizza = RadioField('Tamaño Pizza', 
@@ -64,14 +66,17 @@ class PizzeriaForm(Form):
             ('40','Chica $40'),
             ('80','Mediana $80'),
             ('120','Grande $120')
-            ], 
-        validators=[validators.InputRequired()])
+            ])
     ingredientesPizza = RadioField('Ingredientes Pizza', 
        choices=[
-            ('10','Jamon $10'),
-            ('10','Piña $10'),
-            ('10','Champiñones $120')
-            ], 
-        validators=[validators.InputRequired()])
+            ('1','Jamon $10'),
+            ('2','Piña $10'),
+            ('3','Champiñones $10')
+            ])
+    numVenta = StringField('numVenta')
+    estatus= StringField('Estatus')
     subtotal= StringField('Subtotal')
     total= StringField('Total')
+
+class ConsultaPedidosForm(Form):
+    fecha_seleccionada = DateField('Seleccione una fecha', validators=[DataRequired()], format='%Y-%m-%d')
