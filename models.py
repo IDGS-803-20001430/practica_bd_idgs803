@@ -27,7 +27,7 @@ class PedidosPizza(db.Model):
     total=db.Column(db.String(50))
     numeroVenta=db.Column(db.String(50))  
     estatus=db.Column(db.String(50))  
-    create_date = db.Column(db.Date, default=datetime.date.today)
+    create_date = db.Column(db.Date)
 
 class VentasPizzas(db.Model):
     _tablename_='ventas_pizza'
