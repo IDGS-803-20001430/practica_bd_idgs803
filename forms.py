@@ -1,5 +1,5 @@
 from wtforms import Form
-from wtforms import StringField,SelectField,RadioField,EmailField,IntegerField,DateField
+from wtforms import StringField,SelectField,RadioField,EmailField,IntegerField,DateField,BooleanField
 from wtforms import validators
 from wtforms.validators import DataRequired
 
@@ -68,12 +68,18 @@ class PizzeriaForm(Form):
             ('80','Mediana $80'),
             ('120','Grande $120')
             ])
-    ingredientesPizza = RadioField('Ingredientes Pizza', 
-       choices=[
-            ('1','Jamon $10'),
-            ('2','Piña $10'),
-            ('3','Champiñones $10')
-            ])
+    
+    # ingredientesPizza = RadioField('Ingredientes Pizza', 
+    #    choices=[
+    #         ('1','Jamon $10'),
+    #         ('2','Piña $10'),
+    #         ('3','Champiñones $10')
+    #         ])
+    
+    jamon = BooleanField('Jamon $10', default=False)
+    piña = BooleanField('Piña $10', default=False)
+    champiñones = BooleanField('Champiñones $10', default=False)
+
     numVenta = StringField('numVenta')
     estatus= StringField('Estatus')
     subtotal= StringField('Subtotal')

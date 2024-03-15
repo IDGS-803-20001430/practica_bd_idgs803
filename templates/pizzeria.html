@@ -68,10 +68,13 @@
                 <div class="row control-group">
                     <div class="form-group col-xs-12 float-label-form-group controls"
                 style="display: flex;">
-                    {{ render_field(form.ingredientesPizza, class_="radio", id="ingredientesPizza") }}
+                    
+                    <label>{{ form.jamon }} Jamon $10</label><br>
+                    <label>{{ form.piña }} Piña $10</label><br>
+                    <label>{{ form.champiñones }} Champiñones $10</label><br>
                 </div>
             </div>
-            </div>
+        </div>
             <div style="margin: auto;">
                 <div class="row control-group">
                     <div class="form-group col-xs-12 float-label-form-group controls">
@@ -91,7 +94,7 @@
 
     <div class="container" style="padding-left: 1%; padding-right: 1%; background-color: antiquewhite;">
         <div class="row">
-            <h3>Descripción Pedidos</h3>
+            <h3>Pedidos</h3>
             <form name="registro" action="/eliminarPedido" id="eliminarPedido" method="post">     
                 <table class="table table-bordered">
                     <thead>

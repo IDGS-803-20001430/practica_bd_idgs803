@@ -117,21 +117,32 @@ def pizzeria():
     pizzeria_form=forms.PizzeriaForm(request.form)
     formFecha = forms.ConsultaPedidosForm(request.form)
     pedidosPiza = PedidosPizza.query.filter_by(estatus=1).all()
-    # pedidosPiza = PedidosPizza.query.all()
 
     if request.method == 'POST' and pizzeria_form.validate():
+        jamon=pizzeria_form.jamon.data
+        piña=pizzeria_form.piña.data
+        champiñones=pizzeria_form.champiñones.data
+        costoIngredientes = 0
+        lstIngresientes = ''
+        if jamon:
+            costoIngredientes += 10
+            lstIngresientes += '1,'
+        if piña:
+            costoIngredientes += 10
+            lstIngresientes += '2,'
+        if champiñones:
+            costoIngredientes += 10
+            lstIngresientes += '3,'            
+        
         costoPizza = int(pizzeria_form.tamaPizza.data)
-        #ingrePizza = int(pizzeria_form.ingredientesPizza.data)
         totalPizza = int(pizzeria_form.numPizzas.data)
-        subtotalPizza = str( (costoPizza+10)*totalPizza )
+        subtotalPizza = str( (costoPizza+costoIngredientes)*totalPizza )
         totalPizza = "0"
         
         numVenta = db.session.query(db.func.max(PedidosPizza.numeroVenta)).scalar()
         if numVenta is None:
             numVenta = 1
-            # print("--------------------------------------------------------1")
         elif mismaVenta:
-            # print("--------------------------------------------------------2")
             nombreCliente = pizzeria_form.nombre.data
             direccionCliente = pizzeria_form.direccion.data
             telefonoCliente = pizzeria_form.telefono.data
@@ -145,20 +156,18 @@ def pizzeria():
             pizzeria_form.telefono.render_kw = {'readonly': True}
             pass
         else:
-            # print("--------------------------------------------------------3")
             numVenta = str(int(numVenta)+1)
             pizzeria_form.nombre.render_kw = {'readonly': False}
             pizzeria_form.direccion.render_kw = {'readonly': False}
             pizzeria_form.telefono.render_kw = {'readonly': False}
             mismaVenta = True                
 
-        # print("------------------------------------------Num Venta: {}".format(numVenta))
         nuevo_pedido = PedidosPizza(
             nombre=pizzeria_form.nombre.data,
             direccion=pizzeria_form.direccion.data,
             telefono=pizzeria_form.telefono.data,
             tamaPizza=pizzeria_form.tamaPizza.data,
-            ingredientesPizza= pizzeria_form.ingredientesPizza.data,
+            ingredientesPizza=lstIngresientes,
             numPizza=pizzeria_form.numPizzas.data,
             subtotal=subtotalPizza,
             total=totalPizza,
@@ -170,8 +179,12 @@ def pizzeria():
         db.session.commit()
         pedidosPiza = PedidosPizza.query.filter_by(estatus=1).all()
         for pedido in pedidosPiza:
-            pedido.ingredientesPizza = ingredientesDiccionario[pedido.ingredientesPizza]
-            pedido.tamaPizza = tamañoDiccionario[pedido.tamaPizza]
+            if pedido.ingredientesPizza:
+                ingredientes = pedido.ingredientesPizza.split(',')  
+                ingredientes_texto = ', '.join([ingredientesDiccionario.get(ingrediente, '') for ingrediente in ingredientes])
+                pedido.ingredientesPizza = ingredientes_texto
+            pedido.tamaPizza = tamañoDiccionario.get(pedido.tamaPizza, '')
+
 
         return render_template("pizzeria.html",pedidos=pedidosPiza,form=pizzeria_form, formF=formFecha)
         
@@ -180,10 +193,12 @@ def pizzeria():
         fecha_seleccionada = date.today()  
     ventasFecha = db.session.query(VentasPizzas.nombre, db.func.sum(VentasPizzas.total).label('total')).filter(VentasPizzas.create_date == fecha_seleccionada).group_by(VentasPizzas.nombre).all()
     print(ventasFecha)
-    # print(ventasFecha)   
     for pedido in pedidosPiza:
-        pedido.ingredientesPizza = ingredientesDiccionario[pedido.ingredientesPizza]
-        pedido.tamaPizza = tamañoDiccionario[pedido.tamaPizza] 
+        if pedido.ingredientesPizza:
+            ingredientes = pedido.ingredientesPizza.split(',')
+            ingredientes_texto = ', '.join([ingredientesDiccionario.get(ingrediente, '') for ingrediente in ingredientes])
+            pedido.ingredientesPizza = ingredientes_texto
+        pedido.tamaPizza = tamañoDiccionario.get(pedido.tamaPizza, '')
 
     return render_template("pizzeria.html",pedidos=pedidosPiza,form=pizzeria_form,formF=formFecha,ventasFecha=ventasFecha)
 
@@ -199,9 +214,33 @@ def modificarPedido():
         pizzeria_form.telefono.data=pedidoPizza.telefono 
         pizzeria_form.fecha.data=pedidoPizza.create_date
         pizzeria_form.tamaPizza.data=pedidoPizza.tamaPizza
-        pizzeria_form.ingredientesPizza.data=pedidoPizza.ingredientesPizza
         pizzeria_form.numPizzas.data=pedidoPizza.numPizza
+        
+        # Separar los ingredientes por comas
+        ingredientes = pedidoPizza.ingredientesPizza.split(',')
+        for ingrediente in ingredientes:
+            if ingrediente == '1':
+                pizzeria_form.jamon.data = True
+            elif ingrediente == '2':
+                pizzeria_form.piña.data = True
+            elif ingrediente == '3':
+                pizzeria_form.champiñones.data = True
     if request.method == 'POST':
+        jamon=pizzeria_form.jamon.data
+        piña=pizzeria_form.piña.data
+        champiñones=pizzeria_form.champiñones.data
+        costoIngredientes = 0
+        lstIngresientes = ''
+        if jamon:
+            costoIngredientes += 10
+            lstIngresientes += '1,'
+        if piña:
+            costoIngredientes += 10
+            lstIngresientes += '2,'
+        if champiñones:
+            costoIngredientes += 10
+            lstIngresientes += '3,'
+
         id=pizzeria_form.id.data
         pedidoPizza1= db.session.query(PedidosPizza).filter(PedidosPizza.id==id).first()
         pedidoPizza1.nombre=pizzeria_form.nombre.data
@@ -209,13 +248,12 @@ def modificarPedido():
         pedidoPizza1.telefono=pizzeria_form.telefono.data
         pedidoPizza1.create_date=pizzeria_form.fecha.data
         pedidoPizza1.tamaPizza =pizzeria_form.tamaPizza.data
-        pedidoPizza1.ingredientesPizza=pizzeria_form.ingredientesPizza.data
+        pedidoPizza1.ingredientesPizza=lstIngresientes
         pedidoPizza1.numPizza=pizzeria_form.numPizzas.data
 
         costoPizza = int(pizzeria_form.tamaPizza.data)
-        # ingrePizza = int(pizzeria_form.ingredientesPizza.data)
         totalPizza = int(pizzeria_form.numPizzas.data)
-        subtotalPizza = str( (costoPizza+10)*totalPizza )
+        subtotalPizza = str( (costoPizza+costoIngredientes)*totalPizza )
         totalPizza = "0"
 
         pedidoPizza1.subtotal = subtotalPizza
@@ -229,7 +267,6 @@ def modificarPedido():
 @app.route("/eliminarPedido", methods=["POST"])
 def eliminarPedido():
     if request.method == 'POST':
-        # Obtener los ID de los pedidos seleccionados desde el formulario
         ids_seleccionados = request.form.getlist('pedidos_seleccionados')
         for id_pedido in ids_seleccionados:
             pedido = PedidosPizza.query.get(id_pedido)
@@ -243,23 +280,22 @@ def terminarPedido():
     if request.method == 'POST':
         global mismaVenta
         max_id = db.session.query(db.func.max(PedidosPizza.numeroVenta)).scalar()
-        print("------------------------------ ID máximo: {}".format(max_id))
         suma_subtotal = db.session.query(db.func.sum(PedidosPizza.subtotal)).filter(PedidosPizza.numeroVenta == max_id).scalar()
-        print("------------------------------ Suma de subtotal para idVenta {}: {}".format(max_id, suma_subtotal))
         mismaVenta = False
-        #Obtiene el nombre del cliente
         nombreCliente = db.session.query(PedidosPizza.nombre).filter(PedidosPizza.numeroVenta == max_id).first()[0]
+        fechaVenta = db.session.query(PedidosPizza.create_date).filter(PedidosPizza.numeroVenta == max_id).first()[0]
+        
+        print('-------------------LA FECHA ES: {}'.format(fechaVenta))
 
-        #Ingresa una nueva venta
         nuevaVenta = VentasPizzas(
             nombre=nombreCliente,
             numeroVenta=max_id,
-            total=suma_subtotal
+            total=suma_subtotal,
+            create_date = fechaVenta
         )
         db.session.add(nuevaVenta)
         db.session.commit()
 
-        #Actualizar estatus ----------------------------------------------------------------------
         stmt = update(PedidosPizza).where(PedidosPizza.numeroVenta == max_id).values(estatus=0)
         db.session.execute(stmt)
         db.session.commit()
@@ -275,6 +311,11 @@ def pedidosFecha():
     dia = formFecha.dias_semana.data
     mes = formFecha.meses.data
     anio = formFecha.anios.data
+
+    print(fecha_seleccionada)
+    print(dia)
+    print(mes)
+    print(anio)
 
     if not fecha_seleccionada and not dia and not mes and not anio:
         fecha_seleccionada = date.today()
@@ -331,6 +372,8 @@ def pedidosFecha():
         ).group_by(
             VentasPizzas.nombre
         ).all()
+    
+    print(ventasFecha)
 
     return render_template("pizzeria.html",formF=formFecha, ventasFecha=ventasFecha, form=pizzeria_form)
     
